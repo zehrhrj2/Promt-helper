@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PromptKit Translate — Plain Talk → Optimized Prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-elevated: #141414;
+    --bg-card: #1a1a1a;
+    --border: #2a2a2a;
+    --border-strong: #3a3a3a;
+    --text: #f0f0ee;
+    --text-muted: #888;
+    --text-subtle: #555;
+    --accent: #a8b87a;
+    --accent-dim: #8a9a60;
+    --accent-bright: #b8c878;
+    --accent-glow: rgba(168, 184, 122, 0.35);
+    --accent-soft: rgba(168, 184, 122, 0.12);
+    --claude: #b08040;
+    --gpt: #3a8a6e;
+    --danger: #b84444;
+    --win: #6abf7a;
+    --display: 'Fraunces', serif;
+    --body: 'Inter Tight', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --shadow-card: 0 1px 0 rgba(255,255,255,0.02) inset, 0 4px 12px -6px rgba(0,0,0,0.4);
+    --shadow-elevated: 0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 32px -10px rgba(0,0,0,0.6);
+    --focus-ring: 0 0 0 3px rgba(168, 184, 122, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(168, 184, 122, 0.05), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(176, 128, 64, 0.03), transparent 60%);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 18px 100px;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0 28px;
+    position: sticky;
+    top: 0;
+    background: linear-gradient(180deg, var(--bg) 70%, transparent);
+    z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+
+  .logo {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .logo .dot { color: var(--accent); }
+  .logo .sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-subtle);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .lang-toggle button {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 9px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+    min-height: 36px;
+  }
+  .lang-toggle button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .lang-toggle button.active {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* HERO */
+  .hero {
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(34px, 8.5vw, 48px);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 480px;
+    line-height: 1.5;
+  }
+
+  /* INPUT FORM */
+  .form-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px 20px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+  .field:last-of-type { margin-bottom: 18px; }
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.45;
+    transition: border-color 0.15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 130px;
+    font-family: var(--body);
+  }
+  .field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%23888'%3E%3Cpath d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px;
+    padding-right: 38px;
+  }
+
+  .input-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-subtle);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .generate-btn {
+    width: 100%;
+    background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+    color: #0a0a0a;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-height: 52px;
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-top: 6px;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.25) inset,
+      0 8px 20px -8px var(--accent-glow);
+  }
+  .generate-btn:hover {
+    background: linear-gradient(180deg, var(--accent-bright), var(--accent-dim));
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.3) inset,
+      0 12px 28px -8px var(--accent-glow);
+  }
+  .generate-btn:active {
+    transform: scale(0.985) translateY(0);
+  }
+  .generate-btn:focus-visible {
+    outline: none;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.25) inset,
+      0 0 0 3px rgba(168, 184, 122, 0.5),
+      0 8px 20px -8px var(--accent-glow);
+  }
+
+  /* SAVINGS BANNER */
+  .savings {
+    background: linear-gradient(135deg, rgba(106, 191, 122, 0.08), rgba(168, 184, 122, 0.04));
+    border: 1px solid rgba(106, 191, 122, 0.25);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .savings-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .savings-value {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--win);
+  }
+  .savings-value.neg { color: var(--text-muted); }
+  .savings-detail {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-subtle);
+  }
+
+  /* NET SAVINGS BANNER */
+  .net-savings {
+    background: linear-gradient(135deg, rgba(168, 184, 122, 0.06), rgba(106, 191, 122, 0.03));
+    border: 1px solid rgba(168, 184, 122, 0.2);
+    border-radius: 14px;
+    padding: 12px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .net-savings .net-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-subtle);
+    font-weight: 600;
+  }
+  .net-savings .net-value {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    color: var(--accent-bright);
+  }
+  .net-savings .net-value.positive { color: var(--win); }
+  .net-savings .net-detail {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-subtle);
+  }
+
+  /* OUTPUT */
+  .output {
+    margin-top: 18px;
+  }
+  .output-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .output-header h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+  .output-header span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .prompt-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+  }
+  .prompt-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 16px 0 0 16px;
+  }
+  .prompt-card.claude::before { background: var(--claude); }
+  .prompt-card.gpt::before { background: var(--gpt); }
+  .prompt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elevated);
+    gap: 10px;
+  }
+  .prompt-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .badge .swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+  .prompt-card.claude .swatch { background: var(--claude); }
+  .prompt-card.gpt .swatch { background: var(--gpt); }
+  .token-pill {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .token-pill.lean { color: var(--win); border-color: rgba(106, 191, 122, 0.3); }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-height: 34px;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { border-color: var(--text); background: rgba(255,255,255,0.03); }
+  .copy-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .copy-btn.copied {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .prompt-body {
+    padding: 16px 18px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #d4d4d4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 380px;
+    overflow-y: auto;
+  }
+  .prompt-body::-webkit-scrollbar { width: 6px; }
+  .prompt-body::-webkit-scrollbar-track { background: transparent; }
+  .prompt-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+  /* DETECTED TAGS */
+  .detected {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .detected-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-subtle);
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--accent-bright);
+    border: 1px solid rgba(168, 184, 122, 0.25);
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
+  }
+
+  /* EMPTY STATE */
+  .empty {
+    padding: 8px 0 20px;
+  }
+  .empty-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .skeleton-card {
+    background: var(--bg-card);
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    opacity: 0.55;
+  }
+  .skeleton-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 16px 0 0 16px;
+    opacity: 0.5;
+  }
+  .skeleton-card.claude-skel::before { background: var(--claude); }
+  .skeleton-card.gpt-skel::before { background: var(--gpt); }
+  .skeleton-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .skeleton-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+  .claude-skel .skeleton-dot { background: var(--claude); }
+  .gpt-skel .skeleton-dot { background: var(--gpt); }
+  .skeleton-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: -0.01em;
+  }
+  .skeleton-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .skeleton-line {
+    height: 8px;
+    background: linear-gradient(90deg, var(--border) 0%, var(--border-strong) 50%, var(--border) 100%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: shimmer 2.4s ease-in-out infinite;
+  }
+  .skeleton-line.w-90 { width: 90%; }
+  .skeleton-line.w-70 { width: 70%; }
+  .skeleton-line.w-50 { width: 50%; }
+  @keyframes shimmer {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -200% 0; }
+  }
+  .empty-hint {
+    text-align: center;
+    color: var(--text-subtle);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 60px;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-subtle);
+    letter-spacing: 0.05em;
+  }
+  .footer .credit { color: var(--text-muted); }
+
+  /* MOBILE */
+  @media (max-width: 480px) {
+    .container { padding: 16px 14px 80px; }
+    .form-section { padding: 18px 16px; border-radius: 14px; }
+    .field-row { grid-template-columns: 1fr; }
+    .savings { padding: 12px 14px; }
+    .savings-value { font-size: 18px; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: slideUp 0.3s ease-out backwards; }
+  .animate-in:nth-child(1) { animation-delay: 0s; }
+  .animate-in:nth-child(2) { animation-delay: 0.05s; }
+  .animate-in:nth-child(3) { animation-delay: 0.1s; }
+  .animate-in:nth-child(4) { animation-delay: 0.15s; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <div class="logo">prompt<span class="dot">.</span>kit<span class="sub">/ translate</span></div>
+    <div class="lang-toggle">
+      <button id="langEn" class="active" onclick="setLang('en')">EN</button>
+      <button id="langCs" onclick="setLang('cs')">CS</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 data-i18n="hero_title">Plain talk in. <em>Sharp prompts</em> out.</h1>
+    <p data-i18n="hero_sub">Type how you'd actually say it. The tool strips filler, detects what you want, and outputs two versions: a lean one for Claude (saves your usage) and a deep one for ChatGPT (makes it think harder).</p>
+  </section>
+
+  <section class="form-section">
+    <div class="field">
+      <label for="rawInput" data-i18n="label_input">Your prompt — say it however</label>
+      <textarea id="rawInput" placeholder="e.g. hey can you help me out with this thing where I need to understand how the heart pumps blood and like why it has different chambers because we have a bio test tomorrow"></textarea>
+      <div class="input-meta">
+        <span data-i18n="meta_chars">CHARS / TOKENS</span>
+        <span id="inputStats">0 / ~0</span>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="intentOverride" data-i18n="label_intent">Intent (auto-detected)</label>
+        <select id="intentOverride">
+          <option value="auto" data-i18n="intent_auto">Auto-detect</option>
+          <option value="explain" data-i18n="intent_explain">Explain / Teach</option>
+          <option value="solve" data-i18n="intent_solve">Solve / Calculate</option>
+          <option value="write" data-i18n="intent_write">Write / Draft</option>
+          <option value="code" data-i18n="intent_code">Code / Debug</option>
+          <option value="summarize" data-i18n="intent_summarize">Summarize</option>
+          <option value="compare" data-i18n="intent_compare">Compare</option>
+          <option value="brainstorm" data-i18n="intent_brainstorm">Brainstorm</option>
+          <option value="feedback" data-i18n="intent_feedback">Review / Grade</option>
+          <option value="translate" data-i18n="intent_translate">Translate</option>
+          <option value="homework" data-i18n="intent_homework">Homework / Assignment</option>
+          <option value="study" data-i18n="intent_study">Study / Test Prep</option>
+          <option value="howto" data-i18n="intent_howto">How-to / Steps</option>
+          <option value="rewrite" data-i18n="intent_rewrite">Rewrite / Improve</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="outputLang" data-i18n="label_outlang">Answer language</label>
+        <select id="outputLang">
+          <option value="English" data-i18n="lang_en">English</option>
+          <option value="Czech" data-i18n="lang_cs">Czech</option>
+          <option value="match" data-i18n="lang_match">Match my input</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="depth" data-i18n="label_depth">Depth</label>
+        <select id="depth">
+          <option value="auto" data-i18n="depth_auto">Auto</option>
+          <option value="short" data-i18n="depth_short">Short — just the answer</option>
+          <option value="normal" data-i18n="depth_normal">Normal</option>
+          <option value="deep" data-i18n="depth_deep">Deep — full reasoning</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="audience" data-i18n="label_audience">Level</label>
+        <select id="audience">
+          <option value="auto" data-i18n="aud_auto">Auto</option>
+          <option value="hs" data-i18n="aud_hs">High school</option>
+          <option value="adult" data-i18n="aud_adult">General adult</option>
+          <option value="expert" data-i18n="aud_expert">Expert / technical</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="generate-btn" onclick="generate()" data-i18n="generate_btn">Translate →</button>
+  </section>
+
+  <section class="output" id="output">
+    <div class="empty">
+      <div class="empty-skeleton">
+        <div class="skeleton-card claude-skel">
+          <div class="skeleton-header">
+            <span class="skeleton-dot"></span>
+            <span class="skeleton-label">CLAUDE / LEAN</span>
+          </div>
+          <div class="skeleton-body">
+            <div class="skeleton-line w-90"></div>
+            <div class="skeleton-line w-70"></div>
+            <div class="skeleton-line w-50"></div>
+          </div>
+        </div>
+        <div class="skeleton-card gpt-skel">
+          <div class="skeleton-header">
+            <span class="skeleton-dot"></span>
+            <span class="skeleton-label">CHATGPT / DEEP</span>
+          </div>
+          <div class="skeleton-body">
+            <div class="skeleton-line w-90"></div>
+            <div class="skeleton-line w-70"></div>
+            <div class="skeleton-line w-50"></div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-hint" data-i18n="empty">↑ paste your prompt — translations land here</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div class="credit" data-i18n="footer">Built by Matas. Less talk, more answer.</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// I18N — full Czech for UI AND prompt scaffolding
+// ============================================================
+const i18n = {
+  en: {
+    hero_title: 'Plain talk in. <em>Sharp prompts</em> out.',
+    hero_sub: "Type how you'd actually say it. The tool strips filler, detects what you want, and outputs two versions: a lean one for Claude (saves your usage) and a deep one for ChatGPT (makes it think harder).",
+    label_input: 'Your prompt — say it however',
+    meta_chars: 'CHARS / TOKENS',
+    label_intent: 'Intent (auto-detected)',
+    label_outlang: 'Answer language',
+    label_depth: 'Depth',
+    label_audience: 'Level',
+    intent_auto: 'Auto-detect',
+    intent_explain: 'Explain / Teach',
+    intent_solve: 'Solve / Calculate',
+    intent_write: 'Write / Draft',
+    intent_code: 'Code / Debug',
+    intent_summarize: 'Summarize',
+    intent_compare: 'Compare',
+    intent_brainstorm: 'Brainstorm',
+    intent_feedback: 'Review / Grade',
+    intent_translate: 'Translate',
+    intent_homework: 'Homework / Assignment',
+    intent_study: 'Study / Test Prep',
+    intent_howto: 'How-to / Steps',
+    intent_rewrite: 'Rewrite / Improve',
+    lang_en: 'English', lang_cs: 'Czech', lang_match: 'Match my input',
+    depth_auto: 'Auto', depth_short: 'Short — just the answer', depth_normal: 'Normal', depth_deep: 'Deep — full reasoning',
+    aud_auto: 'Auto', aud_hs: 'High school', aud_adult: 'General adult', aud_expert: 'Expert / technical',
+    generate_btn: 'Translate →',
+    empty: '↑ paste your prompt — translations land here',
+    footer: 'Built by Matas. Less talk, more answer.',
+    output_title: 'Translated prompts',
+    copy: 'Copy', copied: 'Copied!',
+    savings_label: 'Claude version vs your input',
+    savings_saved: 'tokens saved',
+    savings_added: 'tokens added',
+    savings_neutral: 'about the same',
+    detected_label: 'DETECTED',
+    net_label: 'Net effect (prompt longer → output shorter)',
+    net_saved: 'output tokens saved',
+    placeholder: "e.g. hey can you help me out with this thing where I need to understand how the heart pumps blood and like why it has different chambers because we have a bio test tomorrow"
+  },
+  cs: {
+    hero_title: 'Mluv normálně. <em>Dostaneš ostrý prompt.</em>',
+    hero_sub: 'Napiš to tak, jak bys to řekl normálně. Nástroj odstraní zbytečnosti, zjistí co chceš, a vyhodí dvě verze: krátkou pro Claude (šetří usage) a hlubokou pro ChatGPT (donutí ho víc přemýšlet).',
+    label_input: 'Tvůj prompt — řekni to jakkoli',
+    meta_chars: 'ZNAKY / TOKENY',
+    label_intent: 'Záměr (auto-detekce)',
+    label_outlang: 'Jazyk odpovědi',
+    label_depth: 'Hloubka',
+    label_audience: 'Úroveň',
+    intent_auto: 'Auto-detekce',
+    intent_explain: 'Vysvětlit / Naučit',
+    intent_solve: 'Vyřešit / Vypočítat',
+    intent_write: 'Napsat / Sepsat',
+    intent_code: 'Kód / Debug',
+    intent_summarize: 'Shrnout',
+    intent_compare: 'Porovnat',
+    intent_brainstorm: 'Brainstorm',
+    intent_feedback: 'Zhodnotit / Známka',
+    intent_translate: 'Přeložit',
+    intent_homework: 'Úkol / Zadání',
+    intent_study: 'Učení / Příprava na test',
+    intent_howto: 'Návod / Postup',
+    intent_rewrite: 'Přepsat / Vylepšit',
+    lang_en: 'Anglicky', lang_cs: 'Česky', lang_match: 'Podle vstupu',
+    depth_auto: 'Auto', depth_short: 'Krátká — jen odpověď', depth_normal: 'Normální', depth_deep: 'Hluboká — kompletní postup',
+    aud_auto: 'Auto', aud_hs: 'Střední škola', aud_adult: 'Dospělý', aud_expert: 'Expert / technický',
+    generate_btn: 'Přeložit →',
+    empty: '↑ vlož prompt — překlady se objeví tady',
+    footer: 'Postavil Matas. Méně řečí, víc odpovědí.',
+    output_title: 'Přeložené prompty',
+    copy: 'Kopírovat', copied: 'Zkopírováno!',
+    savings_label: 'Claude verze vs tvůj vstup',
+    savings_saved: 'tokenů ušetřeno',
+    savings_added: 'tokenů přidáno',
+    savings_neutral: 'zhruba stejně',
+    detected_label: 'DETEKOVÁNO',
+    net_label: 'Čistý efekt (delší prompt → kratší výstup)',
+    net_saved: 'výstupních tokenů ušetřeno',
+    placeholder: 'např. hele můžeš mi pomoct s tímhle, potřebuju pochopit jak srdce pumpuje krev a proč má různý komory, máme zítra písemku z bio'
+  }
+};
+
+let currentLang = 'en';
+function t(key) { return i18n[currentLang][key] || i18n.en[key] || key; }
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (i18n[currentLang][key]) el.innerHTML = i18n[currentLang][key];
+  });
+  document.getElementById('rawInput').placeholder = t('placeholder');
+}
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('langEn').classList.toggle('active', lang === 'en');
+  document.getElementById('langCs').classList.toggle('active', lang === 'cs');
+  applyTranslations();
+}
+
+// ============================================================
+// TOKEN ESTIMATOR
+// ============================================================
+function estimateTokens(text) {
+  if (!text) return 0;
+  return Math.max(1, Math.round(text.length / 4));
+}
+
+// ============================================================
+// FILLER STRIPPER
+// ============================================================
+const FILLER_PATTERNS = [
+  // English filler
+  /\b(hey|hi|hello|yo)\s+(claude|gpt|chatgpt|ai|there)?,?\s*/gi,
+  /\b(can|could|would|will)\s+you\s+(please\s+)?(help\s+me\s+(out\s+)?(with\s+)?)?/gi,
+  /\b(if\s+)?you\s+(can|could|would|will)\s+(just\s+)?(please\s+)?/gi,
+  /\b(please\s+)?(help\s+me\s+(out\s+)?(with\s+)?)/gi,
+  /\bi\s+(was\s+)?(just\s+)?(kinda\s+)?wondering\s+(if\s+)?/gi,
+  /\bi('?m|\s+am)\s+(just\s+)?trying\s+to\s+/gi,
+  /\bi\s+(really\s+)?need\s+(to\s+|you\s+to\s+|help\s+(with\s+)?)/gi,
+  /\b(if\s+you\s+(don'?t\s+mind|could|can))\b,?\s*/gi,
+  /\b(if\s+(it'?s|its)\s+possible)\b,?\s*/gi,
+  /\bfor\s+me\b,?\s*/gi,
+  /\bthanks?\b\s*(in\s+advance)?,?\s*/gi,
+  /\b(this\s+thing\s+where|that\s+thing\s+where)\s+/gi,
+  /\b(like|kinda|sorta|basically|literally|honestly|actually|you\s+know),?\s+/gi,
+  /\band\s+(stuff|things|like\s+that|whatever)\b/gi,
+  /\b(i\s+guess|or\s+something|or\s+whatever)\b,?\s*/gi,
+  /\bso\s+yeah,?\s*/gi,
+  // Czech filler
+  /\b(hele|čau|ahoj|hej)\s*,?\s*(claude|gpt|chatgpte)?\s*,?\s*/gi,
+  /\b(můžeš|můžete|mohl\s+bys|mohla\s+bys)\s+(mi\s+)?(prosím\s+)?(pomoct|pomoci)(\s+s)?\s*/gi,
+  /\b(potřebuju|potřebuji)\s+(s\s+tím\s+)?(pomoct|pomoci|aby)\s*/gi,
+  /\b(prosím\s+tě|prosím)\s*,?\s*/gi,
+  /\bjako\s+(takhle\s+|že\s+)?/gi,
+  /\b(víš\s+co|chápeš)\s*,?\s*/gi,
+  /\b(prostě|jakože|asi)\s+/gi,
+  /\b(a\s+tak\s+(dál|podobně)|nebo\s+tak\s+nějak|nebo\s+něco)\b/gi,
+];
+
+function stripFiller(text) {
+  let out = text;
+  for (const re of FILLER_PATTERNS) {
+    out = out.replace(re, ' ');
+  }
+  out = out.replace(/\s+/g, ' ').replace(/\s+([,.!?:;])/g, '$1').trim();
+  out = out.replace(/^[,:;]\s*/, '');
+  if (out.length > 0) out = out[0].toUpperCase() + out.slice(1);
+  if (out.length > 0 && !/[.!?]$/.test(out)) out += '.';
+  return out;
+}
+
+// ============================================================
+// INTENT DETECTION — expanded with new intents
+// ============================================================
+const INTENT_KEYWORDS = {
+  // Order matters: more specific intents first
+  homework: ['homework','assignment','úkol','zadání','domácí úkol','solve this','vyřeš tohle','solve the assignment','photo of','fotka','ofoť','vyfotil','vyfotila','sent a pic','screenshot of assignment','what does this say','solve what is in the image','image of','picture of','obrázek','solve from photo','z fotky','z obrázku','the assignment says','the problem says','solve all','vyřeš všechno','do this for me','udělej to za mě','finish this','dokonči to'],
+  study: ['study','test prep','prepare for','review for','quiz me','practice test','flash cards','flashcards','study guide','cram','učit se','příprava na test','příprava na písemku','naučit se','zkouška','opakování','karty','kartičky','otestuj mě','zopakuj','co se mám naučit','jak se připravit','přehled k testu','test zítra','exam tomorrow','midterm','final exam','maturita','zápočet'],
+  translate: ['translate','translation','přeložit','přelož','překlad','how do you say','jak se řekne','into english','do angličtiny','do češtiny','into czech','do němčiny','into german','do francouzštiny','into french','z angličtiny','from english','from czech','z češtiny','mean in','znamená v'],
+  howto: ['how to','how do i','how can i','steps to','step by step','instructions for','guide to','tutorial','walk me through','jak na','jak mám','jak se','postup','návod','krok za krokem','kroky k','jak udělat','jak vytvořit','jak nastavit','jak opravit','how do you','jak se to dělá'],
+  rewrite: ['rewrite','rephrase','improve','make it better','fix my','polish','edit this','clean up','sound better','more professional','more formal','more casual','přepiš','přeformuluj','vylepši','uprav','ať to zní líp','profesionálněji','formálněji','neformálněji','oprav mi'],
+  feedback: ['review','feedback','grade','grade me','check my','evaluate','critique','rate this','is this good','is this correct','did i','am i right','zhodnoť','zkontroluj','ohodnoť','známka','je to správně'],
+  summarize: ['summarize','summary','tldr','tl;dr','key points','main idea','main points','condense','in short','shrň','shrnutí','klíčové body','hlavní myšlenka'],
+  compare: ['compare','versus',' vs ','vs.','difference between','differences between','similarities','contrast','pros and cons','porovnej','rozdíl mezi','rozdíly mezi'],
+  brainstorm: ['brainstorm','ideas','suggestions','give me a list','list of','generate ideas','suggest','recommend','options for','5 ideas','10 ideas','nápad','nápady','návrhy','seznam','vymysli'],
+  solve: ['solve','calculate','compute','what is the answer','find x','find the value','equation','derivative','integral','math problem','arithmetic','vyřeš','vypočítej','spočítej','rovnice','derivace','integrál'],
+  code: ['javascript','python','html','css','react','function','script','debug','bug','error','fix the code','syntax','variable','typescript','npm','npm install','console.log','print(','def ','const ','let ','var ','class ','algorithm','for loop','while loop','program','programming','kód','funkce','chyba','opravit kód'],
+  write: ['write a','write me','draft','compose','essay','email','letter','post','article','paragraph','poem','story','speech','napiš','sepiš','esej','dopis','článek','báseň','příběh'],
+  explain: ['explain','teach me','what is','what are','what does','how does','how do','why does','why do','describe','walk me through','help me understand','tell me about','vysvětli','nauč mě','co je','co jsou','jak funguje','proč','popiš','povídej o']
+};
+
+function detectIntent(text) {
+  const t = ' ' + text.toLowerCase() + ' ';
+  let best = { intent: 'explain', score: 0 };
+  for (const [intent, keywords] of Object.entries(INTENT_KEYWORDS)) {
+    let score = 0;
+    for (const kw of keywords) {
+      if (t.includes(' ' + kw) || t.includes(kw + ' ') || t.includes(' ' + kw + ' ')) score += 2;
+      else if (t.includes(kw)) score += 1;
+    }
+    if (score > best.score) best = { intent, score };
+  }
+  return best.score > 0 ? best.intent : 'explain';
+}
+
+// ============================================================
+// DOMAIN DETECTION
+// ============================================================
+const DOMAIN_KEYWORDS = {
+  math: ['equation','derivative','integral','algebra','geometry','trigonometry','calculus','sin','cos','tan','log','quadratic','polynomial','matrix','vector','probability','statistics','rovnice','derivace','integrál','algebra','geometrie','matematika'],
+  physics: ['force','newton','velocity','acceleration','momentum','energy','quantum','wave','electromagnetic','gravity','torque','friction','optics','síla','rychlost','zrychlení','energie','gravitace','fyzika'],
+  chemistry: ['atom','molecule','element','compound','reaction','periodic','acid','base','ph','organic','inorganic','bond','electron','ion','atomy','molekula','reakce','chemie'],
+  biology: ['cell','dna','rna','protein','organism','ecosystem','photosynthesis','mitosis','meiosis','enzyme','gene','species','evolution','biology','heart','blood','muscle','brain','neuron','buňka','protein','organismus','fotosyntéza','biologie','srdce','krev','sval'],
+  history: ['war','revolution','empire','dynasty','century','medieval','ancient','colonization','renaissance','wwii','wwi','cold war','válka','revoluce','říše','středověk','starověk','dějiny','historie'],
+  literature: ['novel','poem','character','protagonist','metaphor','symbol','theme','narrator','author','shakespeare','román','báseň','postava','metafora','téma','autor'],
+  language: ['grammar','verb','noun','adjective','tense','conjugation','translate','translation','vocabulary','pronunciation','gramatika','sloveso','čas','překlad','slovník','výslovnost'],
+  code: ['javascript','python','html','css','react','typescript','node','sql','api','database','function','variable','class','algorithm','kód','programování'],
+  business: ['marketing','sales','strategy','revenue','profit','customer','pricing','startup','business model','marketing','prodej','strategie','zisk','zákazník'],
+};
+
+function detectDomain(text) {
+  const t = ' ' + text.toLowerCase() + ' ';
+  let best = { domain: 'general', score: 0 };
+  for (const [domain, keywords] of Object.entries(DOMAIN_KEYWORDS)) {
+    let score = 0;
+    for (const kw of keywords) {
+      if (t.includes(' ' + kw + ' ') || t.includes(' ' + kw + ',') ||
+          t.includes(' ' + kw + '.') || t.includes(' ' + kw + '?') ||
+          t.includes(' ' + kw + '!') || t.includes(' ' + kw + ':') ||
+          t.includes(' ' + kw + ';')) {
+        score += 1;
+      }
+    }
+    if (score > best.score) best = { domain, score };
+  }
+  return best.score >= 1 ? best.domain : 'general';
+}
+
+// ============================================================
+// DEPTH / AUDIENCE DETECTION
+// ============================================================
+function detectDepth(text) {
+  const t = text.toLowerCase();
+  if (/\b(quick|quickly|briefly|short|in\s+a\s+sentence|tldr|tl;dr|just\s+the\s+answer|just\s+answer|krátce|stručně|jen\s+odpověď)\b/.test(t)) return 'short';
+  if (/\b(detailed|deep\s+dive|comprehensive|thoroughly|in\s+depth|full\s+explanation|everything\s+about|detailně|hluboce|kompletně|důkladně)\b/.test(t)) return 'deep';
+  return 'normal';
+}
+
+function detectAudience(text) {
+  const t = text.toLowerCase();
+  if (/\b(test\s+tomorrow|exam|homework|assignment|hw|10th\s+grade|11th\s+grade|9th\s+grade|high\s+school|střední\s+škola|úkol|test\s+zítra|písemka|maturita)\b/.test(t)) return 'hs';
+  if (/\b(eli5|like\s+i'?m\s+5|simple\s+terms|beginner|jednoduše|laicky)\b/.test(t)) return 'beginner';
+  if (/\b(advanced|expert|technical|in\s+depth|pokročilý|odborně)\b/.test(t)) return 'expert';
+  return 'auto';
+}
+
+// ============================================================
+// OUTPUT-SHORTENING DIRECTIVES
+// These counter the token cost of longer prompts by making the AI
+// produce dramatically shorter output. Net effect = fewer total tokens.
+// ============================================================
+const BREVITY = {
+  en: {
+    lean: '\n\nOUTPUT RULES: Be concise. No filler words. No "Sure!", "Great question!", or throat-clearing. Skip obvious context the user already knows. Use sentence fragments where clear. If listing, max 1 line per item.',
+    deep: '\n\nOUTPUT RULES: Be thorough but dense. Every sentence must carry information — cut any sentence that just restates the previous one differently. No filler phrases. No "It\'s worth noting that" or "Interestingly". Argue against your first instinct before committing to an answer.'
+  },
+  cs: {
+    lean: '\n\nPRAVIDLA VÝSTUPU: Piš stručně. Žádné výplňové fráze. Žádné "Jistě!", "Skvělá otázka!" ani úvodní kecy. Přeskoč kontext, který uživatel už zná. Používej zkrácené věty kde je to jasné. Pokud jde o seznam, max 1 řádek na bod.',
+    deep: '\n\nPRAVIDLA VÝSTUPU: Buď důkladný ale hutný. Každá věta musí nést informaci — vyškrtni jakoukoli větu, která jen jinak opakuje předchozí. Žádné "Stojí za zmínku" ani "Zajímavé je". Argumentuj proti své první odpovědi než ji potvrdíš.'
+  }
+};
+
+// ============================================================
+// PROMPT BUILDERS — with Czech support + output-shortening
+// ============================================================
+const ROLES = {
+  math: { en: 'a patient math tutor', cs: 'trpělivý učitel matematiky' },
+  physics: { en: 'a physics teacher', cs: 'učitel fyziky' },
+  chemistry: { en: 'a chemistry teacher', cs: 'učitel chemie' },
+  biology: { en: 'a biology teacher', cs: 'učitel biologie' },
+  history: { en: 'a history teacher', cs: 'učitel dějepisu' },
+  literature: { en: 'a literature teacher', cs: 'učitel literatury' },
+  language: { en: 'a language tutor', cs: 'jazykový lektor' },
+  code: { en: 'a senior software engineer', cs: 'zkušený programátor' },
+  business: { en: 'a business strategist', cs: 'obchodní stratég' },
+  general: { en: 'a knowledgeable assistant', cs: 'znalý asistent' },
+};
+
+function buildClaudePrompt(opts) {
+  const { stripped, intent, domain, depth, audience, lang } = opts;
+  const isCs = (lang === 'Czech');
+  const langLine = lang === 'match' ? '' : isCs ? '\n\nOdpověz česky.' : `\n\nRespond in ${lang}.`;
+
+  // Audience prefix
+  const audPrefix = isCs ? (
+    audience === 'hs' ? '[Středoškolák] ' :
+    audience === 'beginner' ? '[Začátečník] ' :
+    audience === 'expert' ? '[Expert] ' : ''
+  ) : (
+    audience === 'hs' ? '[10th grade] ' :
+    audience === 'beginner' ? '[beginner] ' :
+    audience === 'expert' ? '[expert] ' : ''
+  );
+
+  let suffix = '';
+  switch (intent) {
+    case 'solve':
+      if (isCs) {
+        if (depth === 'short') suffix = ' Jen výsledek.';
+        else if (depth === 'deep') suffix = ' Ukaž kroky. Ověř před odesláním.';
+        else suffix = ' Ukaž klíčové kroky.';
+      } else {
+        if (depth === 'short') suffix = ' Final answer only.';
+        else if (depth === 'deep') suffix = ' Show steps. Verify before finalizing.';
+        else suffix = ' Show key steps.';
+      }
+      break;
+
+    case 'code':
+      if (isCs) {
+        if (depth === 'deep') suffix = ' Funkční kód + okrajové případy na konci.';
+      } else {
+        if (depth === 'deep') suffix = ' Working code + note edge cases at end.';
+      }
+      break;
+
+    case 'explain':
+      if (isCs) {
+        if (depth === 'short') suffix = ' Max 3 věty.';
+        else if (depth === 'deep') suffix = ' Vysvětli mechanismus s jedním příkladem.';
+      } else {
+        if (depth === 'short') suffix = ' 3 sentences max.';
+        else if (depth === 'deep') suffix = ' Cover the mechanism with one concrete example.';
+      }
+      break;
+
+    case 'write':
+      if (isCs) {
+        if (depth === 'short') suffix = ' Stručně. Bez úvodu.';
+        else suffix = ' Bez úvodu typu "Zde je váš text".';
+      } else {
+        if (depth === 'short') suffix = ' Tight. No preamble.';
+        else suffix = ' No preamble.';
+      }
+      break;
+
+    case 'summarize':
+      if (isCs) {
+        if (depth === 'short') suffix = ' 2-3 body.';
+        else suffix = ' Hlavní bod první.';
+      } else {
+        if (depth === 'short') suffix = ' 2-3 bullets.';
+        else suffix = ' Main point first.';
+      }
+      break;
+
+    case 'compare':
+      suffix = isCs
+        ? ' Paralelní struktura. Na konci: co je lepší na co.'
+        : ' Parallel structure. End with: which is better for what.';
+      break;
+
+    case 'brainstorm':
+      if (isCs) {
+        if (depth === 'short') suffix = ' 5 nápadů, jeden řádek každý.';
+        else suffix = ' 7-10 nápadů seřazených podle dopadu.';
+      } else {
+        if (depth === 'short') suffix = ' 5 ideas, one line each.';
+        else suffix = ' 7-10 ideas ranked by impact.';
+      }
+      break;
+
+    case 'feedback':
+      suffix = isCs
+        ? ' Konkrétní chyby + opravy. Na konci známka + hlavní zlepšení.'
+        : ' Specific issues + fixes. End with grade + #1 improvement.';
+      break;
+
+    case 'homework':
+      if (isCs) {
+        suffix = ' Vyřeš krok za krokem. U každého kroku napiš PROČ. Výsledek zvýrazni na konci.';
+        if (depth === 'short') suffix = ' Vyřeš a ukaž jen výsledky.';
+      } else {
+        suffix = ' Solve step by step. For each step state WHY. Highlight final answer at end.';
+        if (depth === 'short') suffix = ' Solve and show results only.';
+      }
+      break;
+
+    case 'study':
+      if (isCs) {
+        suffix = ' Udělej stručný přehled klíčových pojmů. U každého 1 věta vysvětlení + 1 příklad. Na konci 3 otázky k sebetestování.';
+        if (depth === 'short') suffix = ' Seznam klíčových pojmů + definice, max 1 řádek.';
+      } else {
+        suffix = ' Brief overview of key concepts. Each: 1-sentence explanation + 1 example. End with 3 self-test questions.';
+        if (depth === 'short') suffix = ' Key terms + definitions, max 1 line each.';
+      }
+      break;
+
+    case 'translate':
+      if (isCs) {
+        suffix = ' Přelož přesně. Zachovej tón originálu. Pokud je víc možností, uveď hlavní překlad a alternativu v závorce.';
+      } else {
+        suffix = ' Translate accurately. Preserve the tone. If multiple valid options, give main translation and alternative in parentheses.';
+      }
+      break;
+
+    case 'howto':
+      if (isCs) {
+        suffix = ' Číslované kroky. Každý krok max 2 věty. Bez zbytečného úvodu.';
+        if (depth === 'deep') suffix = ' Číslované kroky s podrobnými instrukcemi. Varuj o běžných chybách u relevantních kroků.';
+      } else {
+        suffix = ' Numbered steps. Each step max 2 sentences. No preamble.';
+        if (depth === 'deep') suffix = ' Numbered steps with detailed instructions. Warn about common mistakes at relevant steps.';
+      }
+      break;
+
+    case 'rewrite':
+      if (isCs) {
+        suffix = ' Přepiš rovnou — bez komentáře co jsi změnil. Zachovej obsah, vylepši styl.';
+        if (depth === 'deep') suffix = ' Přepiš, pak pod čarou seznam co jsi změnil a proč.';
+      } else {
+        suffix = ' Rewrite directly — no commentary about what you changed. Keep content, improve style.';
+        if (depth === 'deep') suffix = ' Rewrite, then below a line list what you changed and why.';
+      }
+      break;
+  }
+
+  // Add brevity directive for Claude (lean = save output tokens)
+  const brevity = isCs ? BREVITY.cs.lean : BREVITY.en.lean;
+
+  return audPrefix + stripped + suffix + brevity + langLine;
+}
+
+function buildGptPrompt(opts) {
+  const { stripped, intent, domain, depth, audience, lang } = opts;
+  const isCs = (lang === 'Czech');
+  const roleLang = isCs ? 'cs' : 'en';
+  const role = ROLES[domain] ? ROLES[domain][roleLang] : ROLES.general[roleLang];
+
+  const langDir = lang === 'match' ? '' : isCs ? '\nJAZYK: Odpověz česky.' : `\nLANGUAGE: Respond in ${lang}.`;
+  const audPart = isCs ? (
+    audience === 'hs' ? ' Publikum: středoškolák.' :
+    audience === 'beginner' ? ' Publikum: začátečník.' :
+    audience === 'expert' ? ' Publikum: expert / technický.' : ''
+  ) : (
+    audience === 'hs' ? ' Audience: 10th-grade student.' :
+    audience === 'beginner' ? ' Audience: beginner.' :
+    audience === 'expert' ? ' Audience: expert / technical.' : ''
+  );
+
+  let header, steps = '', format = '';
+
+  if (isCs) {
+    header = `Jsi ${role}.${audPart}\n\nÚKOL: ${stripped}`;
+  } else {
+    header = `You are ${role}.${audPart}\n\nTASK: ${stripped}`;
+  }
+
+  switch (intent) {
+    case 'solve':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Přeformuluj co se ptá vlastními slovy.
+2. Vypiš předpoklady a dané hodnoty.
+3. Ukaž každý krok výpočtu. U každého kroku řekni PROČ.
+4. Jasně uveď finální odpověď.
+5. Ověř jednotky a řádovou správnost.`;
+        format = depth === 'short' ?
+          `\n\nFORMÁT: Stručné kroky, finální odpověď tučně.` :
+          `\n\nFORMÁT: Markdown nadpisy pro každou fázi. **Tučně** finální odpověď.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Restate what's being asked in your own words.
+2. List any assumptions or given values.
+3. Show every calculation step. For each step, briefly say WHY.
+4. State the final answer clearly.
+5. Verify units and rough magnitude before finalizing.`;
+        format = depth === 'short' ?
+          `\n\nFORMAT: Brief steps, bold the final answer.` :
+          `\n\nFORMAT: Use markdown headers for each phase. **Bold** the final answer.`;
+      }
+      break;
+
+    case 'code':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Řekni jednou větou co požadavek chce.
+2. Vypiš předpoklady (vstupy, prostředí, okrajové případy).
+3. Funkční kód s komentáři u neočividných řádků.
+4. Po kódu vypiš okrajové případy — ošetřené i neošetřené.
+5. Pokud je chyba, projdi kód řádek po řádku než navrhneš opravu.`;
+        format = `\n\nFORMÁT: Markdown bloky kódu se správným jazykovým tagem.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. State your understanding of the requirement in one sentence.
+2. List the assumptions you're making (inputs, environment, edge cases).
+3. Provide working code with comments on non-obvious lines.
+4. After the code, list edge cases you handled and any you didn't.
+5. If there's a bug to find, walk through the code line by line before suggesting a fix.`;
+        format = `\n\nFORMAT: Use markdown code blocks with the correct language tag.`;
+      }
+      break;
+
+    case 'explain':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Definuj pojem prostým jazykem (1-2 věty).
+2. Vysvětli mechanismus — JAK to funguje, ne jen co to je.
+3. Dej jeden konkrétní příklad nebo analogii.
+4. Uveď jeden běžný mýtus nebo překvapivý fakt.`;
+        format = depth === 'deep' ?
+          `\n\nFORMÁT: Jasné sekce s nadpisy. Tučné klíčové pojmy.` :
+          `\n\nFORMÁT: Prostý text s tučnými klíčovými pojmy. Žádné zbytečné věty.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Define the concept in plain language (1-2 sentences).
+2. Explain the mechanism — HOW it works, not just what it is.
+3. Give one concrete example or analogy.
+4. Note one common misconception or surprising fact.`;
+        format = depth === 'deep' ?
+          `\n\nFORMAT: Use clear section headers. Bold key terms.` :
+          `\n\nFORMAT: Plain prose with bolded key terms. No filler sentences.`;
+      }
+      break;
+
+    case 'write':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Identifikuj z kontextu publikum, tón a délku.
+2. Napiš přímo — žádný meta-komentář.
+3. Zkontroluj text na zbytečné věty a odstraň je.`;
+        format = `\n\nFORMÁT: Čistý výstup, bez úvodu typu "Zde je váš..."`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Identify the implied audience, tone, and length from context.
+2. Draft the piece directly — no meta-commentary or self-reference.
+3. Review your draft for filler sentences and remove them.`;
+        format = `\n\nFORMAT: Plain output, no preamble like "Here is your..."`;
+      }
+      break;
+
+    case 'summarize':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Najdi hlavní tezi nebo poselství.
+2. Vypiš 3-5 podpůrných bodů podle důležitosti.
+3. Zaznamenej cokoliv překvapivého.`;
+        format = `\n\nFORMÁT: Začni jednou větou TL;DR. Pak odrážkové klíčové body.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Identify the central thesis or main point.
+2. List 3-5 supporting ideas in order of importance.
+3. Note anything counterintuitive or worth flagging.`;
+        format = `\n\nFORMAT: Lead with one-sentence TL;DR. Then bulleted key points.`;
+      }
+      break;
+
+    case 'compare':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Vypiš dimenze porovnání.
+2. U každé dimenze řekni jak si vede každá varianta.
+3. Řekni co je lepší na jaký případ a proč.`;
+        format = `\n\nFORMÁT: Markdown srovnávací tabulka. Na konci krátký verdikt "X když..., Y když..."`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. List the dimensions on which to compare.
+2. For each dimension, state how each option performs.
+3. State which is better for which use case, and why.`;
+        format = `\n\nFORMAT: Use a markdown comparison table. End with a short "use X when, use Y when" verdict.`;
+      }
+      break;
+
+    case 'brainstorm':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Vygeneruj ${depth === 'short' ? '5' : '8-12'} různých nápadů — tlač na rozmanitost.
+2. U každého jeden řádek co to je a jeden proč by to mohlo fungovat.
+3. Na konci seřaď podle očekávaného dopadu.`;
+        format = `\n\nFORMÁT: Číslovaný seznam, pak top 3 s odůvodněním.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Generate ${depth === 'short' ? '5' : '8-12'} distinct ideas — push for variety.
+2. For each, write one line of what it is and one line of why it could work.
+3. Rank them by likely impact at the end.`;
+        format = `\n\nFORMAT: Numbered list, then a final ranked top-3 with reasoning.`;
+      }
+      break;
+
+    case 'feedback':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Rozděl práci na části (odstavce, kroky, tvrzení, bloky kódu).
+2. U každé části: cituj, označ ✓ Správně / ◐ Částečně / ✗ Špatně / △ Nejasné.
+3. U částečných/špatných: vysvětli mylný předpoklad, ne jen chybu.
+4. Na konci: odhadovaná známka, nejdůležitější oprava, a jedna skutečná silná stránka.`;
+        format = `\n\nFORMÁT: Rozbor po částech, pak závěrečná sekce s hodnocením. Buď přímý, žádné prázdné pochvaly.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Break the work into parts (paragraphs, steps, claims, code blocks).
+2. For each part: quote it, mark it ✓ Correct / ◐ Partial / ✗ Wrong / △ Unclear.
+3. For partial/wrong: explain the misconception, not just the error.
+4. End with: estimated grade, the #1 highest-leverage fix, and one genuine strength.`;
+        format = `\n\nFORMAT: Part-by-part breakdown, then final grade section. Be direct, no empty praise.`;
+      }
+      break;
+
+    case 'homework':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Identifikuj každý úkol/příklad v zadání.
+2. U každého: přeformuluj co se ptá, vyřeš krok za krokem, u každého kroku řekni PROČ.
+3. Jasně označ finální odpovědi.
+4. Na konci: shrň klíčové postupy které by student měl znát.`;
+        format = `\n\nFORMÁT: Příklad po příkladu, tučné finální odpovědi. Kroky stručné ale kompletní.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Identify each problem/exercise in the assignment.
+2. For each: restate what it asks, solve step by step, state WHY for each step.
+3. Clearly label final answers.
+4. At end: summarize key methods the student should know.`;
+        format = `\n\nFORMAT: Problem-by-problem, bold final answers. Steps concise but complete.`;
+      }
+      break;
+
+    case 'study':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Identifikuj hlavní témata/pojmy ke studiu.
+2. U každého: definice (1 věta) + klíčový příklad + typická zkušební otázka.
+3. Na konci: 5 testových otázek seřazených od lehkých po těžké s odpověďmi.`;
+        format = `\n\nFORMÁT: Strukturovaný přehled. Tučné pojmy. Otázky na konci jasně oddělené.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Identify the main topics/concepts to study.
+2. For each: definition (1 sentence) + key example + typical exam question.
+3. At end: 5 practice questions from easy to hard with answer key.`;
+        format = `\n\nFORMAT: Structured overview. Bold key terms. Questions at end clearly separated.`;
+      }
+      break;
+
+    case 'translate':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Přelož přesně — zachovej tón, registr a záměr originálu.
+2. Pokud existují kulturně specifické výrazy, přizpůsob přirozeně.
+3. Pokud je víc validních překladů, uveď hlavní + alternativu v závorce.`;
+        format = `\n\nFORMÁT: Nejdřív překlad, pak poznámky o volbách (pokud relevantní).`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Translate accurately — preserve tone, register, and intent of the original.
+2. If culturally specific expressions exist, adapt naturally.
+3. If multiple valid translations exist, give main + alternative in parentheses.`;
+        format = `\n\nFORMAT: Translation first, then notes on choices (if relevant).`;
+      }
+      break;
+
+    case 'howto':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Vypiš co je potřeba předem (nástroje, přístupy, prerekvizity).
+2. Číslované kroky — každý je jedna akce.
+3. U kroků kde se často chybuje přidej ⚠️ varování.
+4. Na konci: rychlý troubleshooting pokud něco nefunguje.`;
+        format = `\n\nFORMÁT: Číslovaný postup. Max 2 věty na krok. Výstražné boxy kde relevantní.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. List prerequisites (tools, access, prior knowledge).
+2. Numbered steps — each step is one action.
+3. At steps where mistakes are common, add a ⚠️ warning.
+4. At end: quick troubleshooting if something doesn't work.`;
+        format = `\n\nFORMAT: Numbered procedure. Max 2 sentences per step. Warning boxes where relevant.`;
+      }
+      break;
+
+    case 'rewrite':
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Přečti originál a identifikuj problémy (tón, jasnost, gramatika, struktura).
+2. Přepiš kompletně — zachovej obsah, vylepši formu.
+3. Pod čarou: seznam konkrétních změn a proč.`;
+        format = `\n\nFORMÁT: Nejdřív přepsaná verze (žádný úvod). Pak ---. Pak stručný seznam změn.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Read the original and identify issues (tone, clarity, grammar, structure).
+2. Rewrite completely — keep content, improve form.
+3. Below a divider: list specific changes and why.`;
+        format = `\n\nFORMAT: Rewritten version first (no preamble). Then ---. Then brief change list.`;
+      }
+      break;
+
+    default:
+      if (isCs) {
+        steps = `\n\nINSTRUKCE:
+1. Přeformuluj požadavek pro potvrzení pochopení.
+2. Odpověz přímo a kompletně.
+3. Ověř že odpověď je k věci.`;
+      } else {
+        steps = `\n\nINSTRUCTIONS:
+1. Restate the request to confirm understanding.
+2. Address it directly and completely.
+3. Verify your answer is on-topic before responding.`;
+      }
+  }
+
+  // Add brevity directive for GPT (deep = save output tokens)
+  const brevity = isCs ? BREVITY.cs.deep : BREVITY.en.deep;
+
+  const cot = isCs
+    ? `\n\nPřemýšlej krok za krokem. Zkontroluj odpověď než ji odešleš.${langDir}`
+    : `\n\nThink step by step before responding. Double-check your answer makes sense before finalizing.${langDir}`;
+
+  return header + steps + format + brevity + cot;
+}
+
+// ============================================================
+// MAIN GENERATE
+// ============================================================
+function generate() {
+  const raw = document.getElementById('rawInput').value.trim();
+  if (!raw) {
+    document.getElementById('rawInput').focus();
+    return;
+  }
+
+  const intentOverride = document.getElementById('intentOverride').value;
+  const langSel = document.getElementById('outputLang').value;
+  const depthSel = document.getElementById('depth').value;
+  const audSel = document.getElementById('audience').value;
+
+  const stripped = stripFiller(raw);
+  const intent = intentOverride === 'auto' ? detectIntent(raw) : intentOverride;
+  const domain = detectDomain(raw);
+  const depth = depthSel === 'auto' ? detectDepth(raw) : depthSel;
+  const audience = audSel === 'auto' ? detectAudience(raw) : audSel;
+  const lang = langSel === 'match' ? 'match' : langSel;
+
+  const opts = { stripped, intent, domain, depth, audience, lang };
+  const claude = buildClaudePrompt(opts);
+  const gpt = buildGptPrompt(opts);
+
+  const inputTokens = estimateTokens(raw);
+  const claudeTokens = estimateTokens(claude);
+  const gptTokens = estimateTokens(gpt);
+  const delta = inputTokens - claudeTokens;
+
+  renderOutput({ claude, gpt, intent, domain, depth, audience, inputTokens, claudeTokens, gptTokens, delta });
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderOutput(data) {
+  const { claude, gpt, intent, domain, depth, audience, inputTokens, claudeTokens, gptTokens, delta } = data;
+  const output = document.getElementById('output');
+
+  const tags = [
+    `intent: ${intent}`,
+    `domain: ${domain}`,
+    `depth: ${depth}`,
+    audience !== 'auto' ? `level: ${audience}` : null
+  ].filter(Boolean);
+
+  // Input vs Claude prompt token savings
+  let savingsHTML = '';
+  if (delta > 2) {
+    savingsHTML = `
+      <div class="savings animate-in">
+        <div>
+          <div class="savings-label">${t('savings_label')}</div>
+          <div class="savings-value">−${delta} ${t('savings_saved')}</div>
+        </div>
+        <div class="savings-detail">${inputTokens} → ${claudeTokens} tokens</div>
+      </div>`;
+  } else if (delta < -2) {
+    savingsHTML = `
+      <div class="savings animate-in">
+        <div>
+          <div class="savings-label">${t('savings_label')}</div>
+          <div class="savings-value neg">+${Math.abs(delta)} ${t('savings_added')}</div>
+        </div>
+        <div class="savings-detail">${inputTokens} → ${claudeTokens} tokens · structure added</div>
+      </div>`;
+  } else {
+    savingsHTML = `
+      <div class="savings animate-in">
+        <div>
+          <div class="savings-label">${t('savings_label')}</div>
+          <div class="savings-value neg">${t('savings_neutral')}</div>
+        </div>
+        <div class="savings-detail">${inputTokens} → ${claudeTokens} tokens</div>
+      </div>`;
+  }
+
+  // Estimate net output token savings from brevity directives
+  // Conservative estimate: brevity rules save ~30-50% of typical AI output tokens
+  // Average AI response without brevity: ~300 tokens. With brevity: ~180 tokens.
+  const estOutputSaved = Math.round(120 - Math.abs(delta));
+  const netPositive = estOutputSaved > 0;
+  const netSavingsHTML = `
+    <div class="net-savings animate-in">
+      <div>
+        <div class="net-label">${t('net_label')}</div>
+        <div class="net-value ${netPositive ? 'positive' : ''}">~${Math.abs(estOutputSaved > 0 ? estOutputSaved : 0)} ${t('net_saved')}</div>
+      </div>
+      <div class="net-detail">prompt +${Math.abs(delta)} → output −~120 tok</div>
+    </div>`;
+
+  output.innerHTML = `
+    <div class="output-header animate-in">
+      <h3>${t('output_title')}</h3>
+      <span>/ ${intent}</span>
+    </div>
+
+    <div class="detected animate-in">
+      <span class="detected-label">${t('detected_label')}</span>
+      ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+    </div>
+
+    ${savingsHTML}
+    ${delta < -2 ? netSavingsHTML : ''}
+
+    <div class="prompt-card claude animate-in">
+      <div class="prompt-header">
+        <div class="prompt-header-left">
+          <div class="badge"><span class="swatch"></span>CLAUDE / LEAN</div>
+          <span class="token-pill lean">~${claudeTokens} tok</span>
+        </div>
+        <button class="copy-btn" onclick="copyText(this, 'claude')">${t('copy')}</button>
+      </div>
+      <div class="prompt-body" id="claudeText">${escapeHtml(claude)}</div>
+    </div>
+
+    <div class="prompt-card gpt animate-in">
+      <div class="prompt-header">
+        <div class="prompt-header-left">
+          <div class="badge"><span class="swatch"></span>CHATGPT / DEEP</div>
+          <span class="token-pill">~${gptTokens} tok</span>
+        </div>
+        <button class="copy-btn" onclick="copyText(this, 'gpt')">${t('copy')}</button>
+      </div>
+      <div class="prompt-body" id="gptText">${escapeHtml(gpt)}</div>
+    </div>
+  `;
+
+  setTimeout(() => {
+    output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function copyText(btn, which) {
+  const id = which === 'claude' ? 'claudeText' : 'gptText';
+  const text = document.getElementById(id).textContent;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => showCopied(btn));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showCopied(btn); }
+    catch (e) { alert('Copy failed — please select and copy manually.'); }
+    document.body.removeChild(ta);
+  }
+}
+function showCopied(btn) {
+  btn.textContent = t('copied');
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.textContent = t('copy');
+    btn.classList.remove('copied');
+  }, 1500);
+}
+
+// ============================================================
+// LIVE INPUT STATS
+// ============================================================
+function updateInputStats() {
+  const text = document.getElementById('rawInput').value;
+  const chars = text.length;
+  const tokens = estimateTokens(text);
+  document.getElementById('inputStats').textContent = `${chars} / ~${tokens}`;
+}
+document.getElementById('rawInput').addEventListener('input', updateInputStats);
+
+// ============================================================
+// INIT
+// ============================================================
+applyTranslations();
+updateInputStats();
+
+document.getElementById('rawInput').addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    generate();
+  }
+});
+</script>
+</body>
+</html>
